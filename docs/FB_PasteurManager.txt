@@ -29,7 +29,7 @@ VAR_OUTPUT
     CircPump_ON       : BOOL;  // → DO2_CircPump
     Mixer_ON          : BOOL;  // → DO3_MixerFwd
     CoolingValve_ON   : BOOL;  // → DO1_ValveCold
-    Pasteur_HeatEnable  : BOOL;  // → FB_TemperatureManager.Pasteur_HeatEnable
+
     HeatTargetTemp    : REAL;  // → FB_TemperatureManager.SP_TempTarget
 
     // Диагностика стадий

@@ -125,6 +125,9 @@ END_VAR;
      PAR_PWM_Period_s, маски CIP) через HMI для запуска режимов.
   5. Проведите проверку CIP и пастеризации с учётом защит: команды CMD_Stop,
      ALM_NoWater, блокировка нагрева при превышении ΔT рубашки.
+  6. В схемах OwenLogic и на HMI назначьте PV_TempProduct_Raw,
+     PV_TempJacket_Raw и SP_DoseVolume типу REAL/Float. Это исключит усечение
+     десятичной части при пересчёте температур и дозы из сетевых регистров.
 *)
 
 END_PROGRAM

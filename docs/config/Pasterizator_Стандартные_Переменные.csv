@@ -2,15 +2,15 @@
 Имя переменной;Тип переменной;Энергонезависимость;Значение по умолчанию;Комментарий;Метатип;Путь в каталоге
 PV_TempProduct;Float;No;0;Температура продукта, 0.1 °C (из AI1 NTC);Ram;Process/PV
 PV_TempJacket;Float;No;0;Температура рубашки, 0.1 °C (из AI2 NTC);Ram;Process/PV
-PV_TempProduct_Raw;Boolean;No;0;Температура продукта, 0.1 °C (из TemperMNGR);Ram;Process/PV
-PV_TempJacket_Raw;Boolean;No;0;Температура рубашки, 0.1 °C (из TemperMNGR);Ram;Process/PV
+PV_TempProduct_Raw;Float;No;0;Температура продукта, 0.1 °C (из TemperMNGR);Ram;Process/PV
+PV_TempJacket_Raw;Float;No;0;Температура рубашки, 0.1 °C (из TemperMNGR);Ram;Process/PV
 PAR_UseMixerReverse;Boolean;Yes;0;Разрешить реверс мешалки;Ram;Mixer/Params
 PAR_DispenseEnabled;Boolean;Yes;0;Включить режим розлива;Ram;Dispense/Params
 PAR_DosingEnabled;Boolean;Yes;1;Разрешить порционный розлив;Ram;Dispense/Params
 PAR_PumpFlowRate;Float;Yes;0;Производительность насоса розлива, л/с;Ram;Dispense/Params
 PAR_UsePortionButton;Boolean;No;0;Cтарт порции только по внешней кнопке (b2) ParMask;Ram;Dispense/Params
 PAR_UseGunSensor;Boolean;No;0;Разрешать розлив только при «пистолет на месте (b3) ParMask;Ram;Dispense/Params
-SP_DoseVolume;Boolean;No;0;Объем дозы;Ram;Dispense/Params
+SP_DoseVolume;Float;No;0;Объем дозы;Ram;Dispense/Params
 Dosing_PortionDone;Boolean;No;0;Импульс «Порция готова» от FB_DosingManager;Ram;Dispense/Params
 FillPump_On;Boolean;No;0;Вкл насоса разлива;Ram;Dispense/Params
 CMD_SkipHeatStage;Boolean;No;0;Пропуск этапа нагрева;Ram;Commands

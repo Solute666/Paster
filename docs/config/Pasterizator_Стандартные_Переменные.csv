@@ -82,8 +82,8 @@ DO14_ValveDrain;Boolean;No;0;Клапан слив (CIP) / Зуммер;Ram;I/O/
 STAT_AutoActive;Boolean;Yes;0;Признак «был в автоцикле» (для ALM PowerFail);Ram;Status
 STAT_HeatingActive;Boolean;No;0;Есть включённый нагрев;Ram;Status
 STAT_CoolingActive;Boolean;No;0;Охлаждение активно;Ram;Status
-STAT_MixerRunning;Boolean;No;0;Мешалка работает (по факту);Ram;Status
-STAT_HeatTimeout;Boolean;No;0;Истёк лимит времени нагрева (ожидает действия);Ram;Status
+STAT_MixerRunning;Boolean;No;0;Мешалка работает (DO3/DO4 или частота ПЧ >0,1 Гц);Ram;Status
+STAT_HeatTimeout;Boolean;No;0;Нагрев не достиг SP_HeatTemp за SP_HeatTime_min;Ram;Status
 MODE_Current;Long;No;0;Текущий режим: 0=Idle,1=Пастер.,2=Ручной,3=CIP,4=Розлив,5=Рецепт;Ram;Modes
 MODE_PasteurActive;Boolean;No;0;Флаг: пастеризация активна;Ram;Modes
 MODE_ManualActive;Boolean;No;0;Флаг: ручной режим активен;Ram;Modes
@@ -94,7 +94,7 @@ PAR_HeaterGroup2Enabled;Boolean;Yes;1;Вторая группа нагрева �
 PAR_HeaterGroup3Enabled;Boolean;Yes;1;Третья группа нагрева доступна;Ram;Process/Params
 PAR_StoreEnabled;Boolean;Yes;0;Режим хранения после пастеризации;Ram;Process/Params
 Par_UsePid;Boolean;No;0;Использовать ПИД вкл/выкл;Ram;Process/Params
-Hyst_HeatRequest;Boolean;No;0;Флаг нагрева;Ram;Process/Params
+Hyst_HeatRequest;Boolean;No;0;Гистерезис TemperatureManager требует нагрев (без ПИД);Ram;Process/Params
 DI1_MixerFault;Boolean;No;0;Авария мешалки от ПЧ/пускателя (НЗ контакт);Ram;I/O/DI
 DI2_HeaterFault;Boolean;No;0;Авария нагрева (термореле/термостат ТЭНов, НЗ);Ram;I/O/DI
 DI3_LevelJacket;Boolean;No;0;Уровень воды в рубашке (НЗ): 1=уровень есть;Ram;I/O/DI

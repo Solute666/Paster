@@ -9,6 +9,7 @@
   - ШИМ тайм-пропорциональный с периодом PAR_PWM_Period_s (SSR: 1..2 c; контактор: 10..30 c).
   - Фильтрация температур: IIR 1-го порядка (alpha из PAR_FilterAlpha_x1000: 0..1000 → 0..1).
   - Защита по ΔT рубашка–продукт: если превышена SmoothDiffGuard, мощность ограничивается.
+  - При работе в гистерезисе выводит Hyst_HeatRequest для HMI (состояние текущего запроса нагрева).
 *)
 
 FUNCTION_BLOCK FB_TemperatureManager_v3
@@ -68,6 +69,7 @@ VAR_OUTPUT
 
     // Диагностика/индикация:
     DutyPct                   : REAL;       // итоговая мощность после ограничений, %
+    Hyst_HeatRequest          : BOOL;       // TRUE, когда гистерезис требует нагрев (PAR_UsePID = FALSE)
 END_VAR
 
 VAR
@@ -148,6 +150,8 @@ g3Threshold := PAR_G3_StartPct; IF g3Threshold < 0.0 THEN g3Threshold := 0.0; EN
 // ===== ОГРАНИЧЕНИЕ ПО ΔT РУБАШКА–ПРОДУКТ =====
 jacketGuardActive := (PV_TempJacket > (PV_TempProduct + SmoothDiffGuard));
 
+Hyst_HeatRequest := FALSE;
+
 // ===== ОСНОВНОЙ ВЫБОР ТРАКТА (PID / HYST) =====
 IF (NOT Pasteur_HeatEnable) THEN
     // Нагрев запрещён окном стадии — всё в ноль
@@ -221,6 +225,8 @@ ELSE
         ELSE
             dutyPctInternal := 0.0;
         END_IF;
+
+        Hyst_HeatRequest := hystState;
 
         pidIntegral := 0.0;
         prevProductTemp := PV_TempProduct;

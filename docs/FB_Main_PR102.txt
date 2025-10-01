@@ -6,6 +6,7 @@
   - Конвертация AI (UDINT ×10) → REAL и предварительный контроль обрыва/КЗ делаем в Main,
     на TemperatureManager подаём уже проверенные *_Raw (REAL).
   - Гистерезис больше не формируется в Main — он внутри TemperatureManager.
+  - Формируются статусы STAT_MixerRunning и STAT_HeatTimeout для индикации на HMI.
 *)
 
 FUNCTION_BLOCK FB_Main_PR102
@@ -40,6 +41,7 @@ VAR_INPUT
     SP_SmoothTemp            : REAL;   // °C
     SP_SmoothDiff            : REAL;   // °C
     SP_HoldTime_s            : UDINT;  // сек
+    SP_HeatTime_min          : UDINT;  // мин — лимит на набор температуры (0 = отключено)
 
     // Измерения (фильтрованные от TemperatureManager)
     PV_TempProduct           : REAL;   // °C
@@ -108,6 +110,8 @@ VAR_OUTPUT
     ALM_Mask_UD             : UDINT;
     STAT_OutStateMask       : UDINT;
     MB_OutStateMask         : UDINT;   // 517
+    STAT_MixerRunning       : BOOL;    // TRUE, когда мешалка фактически вращается
+    STAT_HeatTimeout        : BOOL;    // TRUE, если нагрев не уложился в заданное время
 
     // Локальные команды (без сети)
     CMD_Stop                : BOOL;    // аварийный стоп (Variant A: только E-Stop)
@@ -181,6 +185,14 @@ VAR
     pd_expire_sec        : UDINT := 0;
 
     doseR                : REAL := 0.0;
+
+    // Контроль фактического прогрева
+    heatPhaseActive      : BOOL := FALSE;
+    heatPhaseStartSec    : UDINT := 0;
+    heatElapsedSec       : UDINT := 0;
+    heatLimitSec         : UDINT := 0;
+    heatTimeoutActive    : BOOL := FALSE;
+    heatReachedBand      : REAL := 0.3;   // °C — допуск до уставки для сброса тайм-аута
 
     // Импульсообразователь для CMD_Resume
     prevResumeLevel      : BOOL := FALSE;
@@ -299,6 +311,50 @@ doMaskUD.12 := DO13_PumpCIP;
 doMaskUD.13 := DO14_ValveDrain;
 STAT_OutStateMask := doMaskUD;
 MB_OutStateMask   := doMaskUD;
+
+// Фактический статус мешалки: при работе любого направления или ненулевой частоте ПЧ
+STAT_MixerRunning := DO3_MixerFwd OR DO4_MixerRev OR (VFD_RunHz > 0.1);
+
+// Контроль времени набора температуры (в пастеризации)
+IF SP_HeatTime_min = 0 THEN
+    heatLimitSec := 0;
+ELSE
+    IF SP_HeatTime_min >= 71582788 THEN
+        heatLimitSec := 4294967295; // защита от переполнения (UDINT_MAX)
+    ELSE
+        heatLimitSec := SP_HeatTime_min * 60;
+    END_IF;
+END_IF;
+
+IF Mode_Pasteur_RunReq AND (PV_TempProduct < (SP_HeatTemp - heatReachedBand)) THEN
+    IF NOT heatPhaseActive THEN
+        heatPhaseActive   := TRUE;
+        heatPhaseStartSec := Seconds_UD;
+        heatElapsedSec    := 0;
+        heatTimeoutActive := FALSE;
+    ELSE
+        IF Seconds_UD >= heatPhaseStartSec THEN
+            heatElapsedSec := Seconds_UD - heatPhaseStartSec;
+        ELSE
+            heatElapsedSec := 0;
+        END_IF;
+
+        IF (heatLimitSec > 0) AND (heatElapsedSec >= heatLimitSec) THEN
+            heatTimeoutActive := TRUE;
+        END_IF;
+    END_IF;
+ELSE
+    heatPhaseActive := FALSE;
+    heatElapsedSec  := 0;
+
+    IF PV_TempProduct >= (SP_HeatTemp - heatReachedBand) THEN
+        heatTimeoutActive := FALSE;
+    ELSIF NOT Mode_Pasteur_RunReq THEN
+        heatTimeoutActive := FALSE;
+    END_IF;
+END_IF;
+
+STAT_HeatTimeout := heatTimeoutActive;
 
 // ===== РАСПАКОВКА МАСОК КОМАНД (зеркала) =====
 // MB_CmdMask1 (541)

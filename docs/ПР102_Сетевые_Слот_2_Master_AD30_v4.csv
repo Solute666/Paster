@@ -1,0 +1,15 @@
+﻿Имя переменной;Тип переменной;Функция чтения;Функция записи;Адрес регистра;Адрес бита (ов);Комментарий;Метатип;Путь в каталоге;Версия платформы
+VFD_SetFreqPct;Целочисленное;0x03;0x06;4096;0;AD30: Задание частоты, -10000..10000 = -100,00..100,00 % от P0-14 (0x1000);Remote;VFD/Commands;1
+VFD_SetFreqHz_x0_01;Целочисленное;0x03;0x06;36864;0;AD30: Задание частоты, 0..P0-14 с шагом 0,01 Гц (0x9000);Remote;VFD/Commands;1
+VFD_CmdWord;Целочисленное;0x03;0x06;8192;0;AD30: Команда: 1=FWD, 2=REV, 5=CoastStop, 6=DecelStop, 7/8=Reset (0x2000);Remote;VFD/Commands;1
+VFD_Status;Целочисленное;0x03;0x06;12288;0;AD30: Статус вращения 1=FWD,2=REV,3=STOP (0x3000) [READ-ONLY];Remote;VFD/Status;1
+VFD_Mon_SetHz_x0_01;Целочисленное;0x03;0x06;4097;0;AD30: Заданная частота, 0,01 Гц (0x1001) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_RunHz_x0_01;Целочисленное;0x03;0x06;4098;0;AD30: Рабочая частота, 0,01 Гц (0x1002) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_DCBus_0_1V;Целочисленное;0x03;0x06;4099;0;AD30: DC-шина, 0,1 В (0x1003) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_OutVolt_1V;Целочисленное;0x03;0x06;4100;0;AD30: Uвыход, 1 В (0x1004) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_OutCurrent_0_1A;Целочисленное;0x03;0x06;4101;0;AD30: Iвыход, 0,1 А (0x1005) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_OutPower_0_1kW;Целочисленное;0x03;0x06;4102;0;AD30: Pвыход, 0,1 кВт (0x1006) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_DI_State;Целочисленное;0x03;0x06;4103;0;AD30: Состояние DI (0x1007) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_Mon_DO_State;Целочисленное;0x03;0x06;4104;0;AD30: Состояние DO (0x1008) [READ-ONLY];Remote;VFD/Monitor;1
+VFD_DO_Control;Целочисленное;0x03;0x06;8193;0;AD30: Управление DO: бит0=TA-TB-TC, бит1=Y (0x2001);Remote;VFD/Commands;1
+VFD_AO_Command_0_100pct_x0_01;Целочисленное;0x03;0x06;8194;0;AD30: AO по связи 0..100% (0..0x7FFF) (0x2002);Remote;VFD/Commands;1

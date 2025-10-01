@@ -1,0 +1,206 @@
+﻿VariableName;VariableType;IsRetain;DefaultValue;Comment;MetaType;CatalogPath
+Имя переменной;Тип переменной;Энергонезависимость;Значение по умолчанию;Комментарий;Метатип;Путь в каталоге
+PV_TempProduct;Float;No;0;Температура продукта, 0.1 °C (из AI1 NTC);Ram;Process/PV
+PV_TempJacket;Float;No;0;Температура рубашки, 0.1 °C (из AI2 NTC);Ram;Process/PV
+PV_TempProduct_Raw;Boolean;No;0;Температура продукта, 0.1 °C (из TemperMNGR);Ram;Process/PV
+PV_TempJacket_Raw;Boolean;No;0;Температура рубашки, 0.1 °C (из TemperMNGR);Ram;Process/PV
+PAR_UseMixerReverse;Boolean;Yes;0;Разрешить реверс мешалки;Ram;Mixer/Params
+PAR_DispenseEnabled;Boolean;Yes;0;Включить режим розлива;Ram;Dispense/Params
+PAR_DosingEnabled;Boolean;Yes;1;Разрешить порционный розлив;Ram;Dispense/Params
+PAR_PumpFlowRate;Float;Yes;0;Производительность насоса розлива, л/с;Ram;Dispense/Params
+PAR_UsePortionButton;Boolean;No;0;Cтарт порции только по внешней кнопке (b2) ParMask;Ram;Dispense/Params
+PAR_UseGunSensor;Boolean;No;0;Разрешать розлив только при «пистолет на месте (b3) ParMask;Ram;Dispense/Params
+SP_DoseVolume;Boolean;No;0;Объем дозы;Ram;Dispense/Params
+Dosing_PortionDone;Boolean;No;0;Импульс «Порция готова» от FB_DosingManager;Ram;Dispense/Params
+FillPump_On;Boolean;No;0;Вкл насоса разлива;Ram;Dispense/Params
+CMD_SkipHeatStage;Boolean;No;0;Пропуск этапа нагрева;Ram;Commands
+CMD_ResetAlarms;Boolean;No;0;Сброс аварий;Ram;Commands
+Man6_Heater1;Boolean;No;0;Ручной: нагрев №1 Вкл/Выкл;Ram;Commands
+Man7_Heater2;Boolean;No;0;Ручной: нагрев №2 Вкл/Выкл;Ram;Commands
+Man1_ValveCold;Boolean;No;0;Ручной: охлаждение (клапан ХВС) Вкл/Выкл;Ram;Commands
+Man3_MixerFwd;Boolean;No;0;Ручной: направление мешалки Вперёд;Ram;Commands
+Man4_MixerRev;Boolean;No;0;Ручной: направление мешалки Назад;Ram;Commands
+CMD_NextDose;Boolean;No;0;Подача следующей порции (внешняя/панель);Ram;Commands
+Man2_CircPump;Boolean;No;0;Ручной: Циркуляционный насос пастеризатора в ручную( прокачка теплоносителя по контуру);Ram;Commands
+Man5_PumpDisp;Boolean;No;0;Ручной: Насос розлива ;Ram;Commands
+Man8_Heater3;Boolean;No;0;Ручной: нагрев №3 Вкл/Выкл;Ram;Commands
+Man9_CIP_ValveCW;Boolean;No;0;Ручной: Клапан ХВС (CIP);Ram;Commands
+Man10_CIP_ValveHW;Boolean;No;0;Ручной: Клапан ГВС (CIP);Ram;Commands
+Man11_CIP_ValveAlk;Boolean;No;0;Ручной: Клапан подачи щёлочи (CIP);Ram;Commands
+Man12_CIP_ValveAcid;Boolean;No;0;Ручной: Клапан подачи кислоты (CIP);Ram;Commands
+Man13_CIP_Pump;Boolean;No;0;Ручной: Насос CIP;Ram;Commands
+Man14_CIP_ValveDrain;Boolean;No;0;Ручной: Клапан слив (CIP) / Зуммер;Ram;Commands
+Mode_Pasteur_RunReq;Boolean;No;0;Вкл/Выкл режим пастеризация;Ram;Commands
+Mode_DispCont_RunReq;Boolean;No;0;Вкл/Выкл режим непрерывный разлив;Ram;Commands
+Mode_DispDose_RunReq;Boolean;No;0;Вкл/Выкл режим порционный розлив;Ram;Commands
+Mode_CIP_Full_RunReq;Boolean;No;0;Вкл/Выкл режим CIP полная;Ram;Commands
+Mode_CIP_Alk_RunReq;Boolean;No;0;Вкл/Выкл режим CIP щелочь;Ram;Commands
+Mode_CIP_Acid_RunReq;Boolean;No;0;Вкл/Выкл режим CIP кислота;Ram;Commands
+Mode_CIP_Rinse_RunReq;Boolean;No;0;Вкл/Выкл режим CIP ополаскивание;Ram;Commands
+CMD_RestSoftFlow;Boolean;No;0;Сброс счетчика разлива ;Ram;Commands
+CMD_Stop;Boolean;No;0;Аварийный стоп;Ram;Commands
+CMD_Resume;Boolean;No;0;Продолжить после паузы;Ram;Commands
+ALM_SensorProduct_Break;Boolean;No;0;Авария: обрыв датчика температуры продукта (бит0);Ram;Alarms
+ALM_SensorProduct_Short;Boolean;No;0;Авария: КЗ датчика температуры продукта (бит1);Ram;Alarms
+ALM_SensorJacket_Break;Boolean;No;0;Авария: обрыв датчика температуры рубашки (бит2);Ram;Alarms
+ALM_SensorJacket_Short;Boolean;No;0;Авария: КЗ датчика температуры рубашки (бит3);Ram;Alarms
+ALM_MixerFault;Boolean;No;0;Авария: мешалка/ПЧ (бит4);Ram;Alarms
+ALM_HeaterFault;Boolean;No;0;Авария: нагреватели/термореле (бит5);Ram;Alarms
+ALM_PowerFail;Boolean;No;0;Авария: потеря питания в автоцикле (бит6);Ram;Alarms
+ALM_PIDBadParams;Boolean;No;0;Авария: неверные параметры ПИД (бит7);Ram;Alarms
+ALM_Reserved8;Boolean;No;0;Резерв (бит8);Ram;Alarms
+ALM_Reserved9;Boolean;No;0;Резерв (бит9);Ram;Alarms
+ALM_ValveAlk_Fault;Boolean;No;0;Резерв/авария клапана щёлочи (бит10);Ram;Alarms
+ALM_ValveAcid_Fault;Boolean;No;0;Резерв/авария клапана кислоты (бит11);Ram;Alarms
+ALM_NoWaterJacket;Boolean;No;0;Авария: нет уровня в рубашке (бит12);Ram;Alarms
+ALM_PasteurAbort;Boolean;No;0;Преждевременный останов пастеризации (бит13);Ram;Alarms
+ALM_CIPAbort;Boolean;No;0;Преждевременный останов мойки (бит14);Ram;Alarms
+ALM_Reserved15;Boolean;No;0;Резерв (бит15);Ram;Alarms
+ALM_Mask;Long;No;0;Маска аварий 16 бит (для Modbus 500);Ram;Alarms
+ALM_NoWater;Boolean;No;0;НО датчик потока/наличия воды в контуре CIP;Ram;Alarms
+AO_HeaterPower;Float;No;0;Аналоговый выход мощности нагрева, 0..1000 (0..100%);Ram;I/O/AO
+AO_MixerSpeed;Float;No;0;Аналоговый выход скорости мешалки, 0..1000 (0..100%);Ram;I/O/AO
+SP_WashRinseTime;Long;No;120;CIP: время ополаскивания, сек;Ram;CIP/SP
+SP_WashAlkTime;Long;No;600;CIP: время щёлочной мойки, сек;Ram;CIP/SP
+SP_WashAcidTime;Long;No;600;CIP: время кислотной мойки, сек;Ram;CIP/SP
+STAT_VFD_Online;Boolean;No;0;Связь с ПЧ по Modbus есть;Ram;Mixer/Status
+STAT_VFD_Fault;Boolean;No;0;Авария привода по данным ПЧ;Ram;Mixer/Status
+DO1_ValveCold;Boolean;No;0;Клапан ХВС (охлаждение рубашки);Ram;I/O/DO
+DO2_CircPump;Boolean;No;0;Циркуляционный насос пастеризатора( прокачка теплоносителя по контуру);Ram;I/O/DO
+DO3_MixerFwd;Boolean;No;0;Мешалка, направление Вперёд (опция);Ram;I/O/DO
+DO4_MixerRev;Boolean;No;0;Мешалка, направление Назад (опция);Ram;I/O/DO
+DO5_PumpDisp;Boolean;No;0;Насос розлива;Ram;I/O/DO
+DO6_Heater1;Boolean;No;0;Нагрев, группа 1 / паровой клапан;Ram;I/O/DO
+DO7_Heater2;Boolean;No;0;Нагрев, группа 2;Ram;I/O/DO
+DO8_Heater3;Boolean;No;0;Нагрев, группа 3;Ram;I/O/DO
+DO9_ValveCIP_Cold;Boolean;No;0;Клапан ХВС (CIP);Ram;I/O/DO
+DO10_ValveCIP_Hot;Boolean;No;0;Клапан ГВС (CIP);Ram;I/O/DO
+DO11_ValveAlk;Boolean;No;0;Клапан подачи щёлочи (CIP);Ram;I/O/DO
+DO12_ValveAcid;Boolean;No;0;Клапан подачи кислоты (CIP);Ram;I/O/DO
+DO13_PumpCIP;Boolean;No;0;Насос CIP;Ram;I/O/DO
+DO14_ValveDrain;Boolean;No;0;Клапан слив (CIP) / Зуммер;Ram;I/O/DO
+STAT_AutoActive;Boolean;Yes;0;Признак «был в автоцикле» (для ALM PowerFail);Ram;Status
+STAT_HeatingActive;Boolean;No;0;Есть включённый нагрев;Ram;Status
+STAT_CoolingActive;Boolean;No;0;Охлаждение активно;Ram;Status
+STAT_MixerRunning;Boolean;No;0;Мешалка работает (по факту);Ram;Status
+STAT_HeatTimeout;Boolean;No;0;Истёк лимит времени нагрева (ожидает действия);Ram;Status
+MODE_Current;Long;No;0;Текущий режим: 0=Idle,1=Пастер.,2=Ручной,3=CIP,4=Розлив,5=Рецепт;Ram;Modes
+MODE_PasteurActive;Boolean;No;0;Флаг: пастеризация активна;Ram;Modes
+MODE_ManualActive;Boolean;No;0;Флаг: ручной режим активен;Ram;Modes
+MODE_CIPActive;Boolean;No;0;Флаг: мойка CIP активна;Ram;Modes
+MODE_DispenseActive;Boolean;No;0;Флаг: розлив активен;Ram;Modes
+PAR_UseSteam;Boolean;Yes;0;Пар вместо ТЭНов (управление клапаном пара);Ram;Process/Params
+PAR_HeaterGroup2Enabled;Boolean;Yes;1;Вторая группа нагрева доступна;Ram;Process/Params
+PAR_HeaterGroup3Enabled;Boolean;Yes;1;Третья группа нагрева доступна;Ram;Process/Params
+PAR_StoreEnabled;Boolean;Yes;0;Режим хранения после пастеризации;Ram;Process/Params
+Par_UsePid;Boolean;No;0;Использовать ПИД вкл/выкл;Ram;Process/Params
+Hyst_HeatRequest;Boolean;No;0;Флаг нагрева;Ram;Process/Params
+DI1_MixerFault;Boolean;No;0;Авария мешалки от ПЧ/пускателя (НЗ контакт);Ram;I/O/DI
+DI2_HeaterFault;Boolean;No;0;Авария нагрева (термореле/термостат ТЭНов, НЗ);Ram;I/O/DI
+DI3_LevelJacket;Boolean;No;0;Уровень воды в рубашке (НЗ): 1=уровень есть;Ram;I/O/DI
+DI4_PortionBtn;Boolean;No;0;Внешняя кнопка порции (НО);Ram;I/O/DI
+DI5_GunSensor;Boolean;No;0;Датчик «пистолет» розлива (НО): 1=снят;Ram;I/O/DI
+D6I_ProductFlow;Boolean;No;0;Наличие продукта/поток CIP (НО);Ram;I/O/DI
+DI7_EStop;Boolean;No;0;Аварийная остановка (НЗ): 1=норма, 0=E-Stop;Ram;I/O/DI
+AI_TempJacket;Long;No;0;Температура рубашки, *10 °C (из AI2 NTC);Ram;I/O/AI
+AI_TempProduct;Long;No;0;Температура продукта, *10 °C (из AI1 NTC);Ram;I/O/AI
+CIP_ModeMask_Full;Long;Yes;127;Маска циклов для режима «Полный» (биты 0..6 = циклы 1..7);Ram;CIP/ModeMasks
+CIP_ModeMask_Alk;Long;Yes;103;Маска циклов для режима «Щелочь» (циклы 1,2,3,6,7);Ram;CIP/ModeMasks
+CIP_ModeMask_Acid;Long;Yes;115;Маска циклов для режима «Кислота» (циклы 1,2,5,6,7);Ram;CIP/ModeMasks
+CIP_ModeMask_Rinse;Long;Yes;96;Маска циклов для режима «Ополаскивание» (циклы 6,7);Ram;CIP/ModeMasks
+CIP_DrainOnStopSec;Long;Yes;30;Слив при корректном стопе, сек;Ram;CIP/Params
+CIP_ChemConflictPolicy;Long;Yes;1;Политика конфликта ALK+ACID: 0=запрет обоих, 1=приоритет ALK, 2=приоритет ACID;Ram;CIP/Params
+CIP_LiveWriteCommitDelay_s;Long;Yes;2;Задержка коммита LiveWrite, сек;Ram;CIP/Params
+CIP_C1_T_HOT_s;Long;Yes;0;C1: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C1
+CIP_C1_T_COLD_s;Long;Yes;0;C1: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C1
+CIP_C1_T_ALK_s;Long;Yes;0;C1: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C1
+CIP_C1_T_ACID_s;Long;Yes;0;C1: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C1
+CIP_C1_T_PUMP_s;Long;Yes;0;C1: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C1
+CIP_C1_T_DRAIN_s;Long;Yes;0;C1: Время слива, сек (этап 3);Ram;CIP/Cycles/C1
+CIP_C1_MixerStage1;Boolean;Yes;0;C1: Мешалка этап 1 (набор);Ram;CIP/Cycles/C1
+CIP_C1_MixerStage2;Boolean;Yes;0;C1: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C1
+CIP_C1_MixerStage3;Boolean;Yes;0;C1: Мешалка этап 3 (слив);Ram;CIP/Cycles/C1
+CIP_C2_T_HOT_s;Long;Yes;0;C2: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C2
+CIP_C2_T_COLD_s;Long;Yes;0;C2: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C2
+CIP_C2_T_ALK_s;Long;Yes;0;C2: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C2
+CIP_C2_T_ACID_s;Long;Yes;0;C2: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C2
+CIP_C2_T_PUMP_s;Long;Yes;0;C2: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C2
+CIP_C2_T_DRAIN_s;Long;Yes;0;C2: Время слива, сек (этап 3);Ram;CIP/Cycles/C2
+CIP_C2_MixerStage1;Boolean;Yes;0;C2: Мешалка этап 1 (набор);Ram;CIP/Cycles/C2
+CIP_C2_MixerStage2;Boolean;Yes;0;C2: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C2
+CIP_C2_MixerStage3;Boolean;Yes;0;C2: Мешалка этап 3 (слив);Ram;CIP/Cycles/C2
+CIP_C3_T_HOT_s;Long;Yes;0;C3: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C3
+CIP_C3_T_COLD_s;Long;Yes;0;C3: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C3
+CIP_C3_T_ALK_s;Long;Yes;0;C3: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C3
+CIP_C3_T_ACID_s;Long;Yes;0;C3: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C3
+CIP_C3_T_PUMP_s;Long;Yes;0;C3: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C3
+CIP_C3_T_DRAIN_s;Long;Yes;0;C3: Время слива, сек (этап 3);Ram;CIP/Cycles/C3
+CIP_C3_MixerStage1;Boolean;Yes;0;C3: Мешалка этап 1 (набор);Ram;CIP/Cycles/C3
+CIP_C3_MixerStage2;Boolean;Yes;0;C3: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C3
+CIP_C3_MixerStage3;Boolean;Yes;0;C3: Мешалка этап 3 (слив);Ram;CIP/Cycles/C3
+CIP_C4_T_HOT_s;Long;Yes;0;C4: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C4
+CIP_C4_T_COLD_s;Long;Yes;0;C4: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C4
+CIP_C4_T_ALK_s;Long;Yes;0;C4: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C4
+CIP_C4_T_ACID_s;Long;Yes;0;C4: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C4
+CIP_C4_T_PUMP_s;Long;Yes;0;C4: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C4
+CIP_C4_T_DRAIN_s;Long;Yes;0;C4: Время слива, сек (этап 3);Ram;CIP/Cycles/C4
+CIP_C4_MixerStage1;Boolean;Yes;0;C4: Мешалка этап 1 (набор);Ram;CIP/Cycles/C4
+CIP_C4_MixerStage2;Boolean;Yes;0;C4: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C4
+CIP_C4_MixerStage3;Boolean;Yes;0;C4: Мешалка этап 3 (слив);Ram;CIP/Cycles/C4
+CIP_C5_T_HOT_s;Long;Yes;0;C5: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C5
+CIP_C5_T_COLD_s;Long;Yes;0;C5: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C5
+CIP_C5_T_ALK_s;Long;Yes;0;C5: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C5
+CIP_C5_T_ACID_s;Long;Yes;0;C5: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C5
+CIP_C5_T_PUMP_s;Long;Yes;0;C5: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C5
+CIP_C5_T_DRAIN_s;Long;Yes;0;C5: Время слива, сек (этап 3);Ram;CIP/Cycles/C5
+CIP_C5_MixerStage1;Boolean;Yes;0;C5: Мешалка этап 1 (набор);Ram;CIP/Cycles/C5
+CIP_C5_MixerStage2;Boolean;Yes;0;C5: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C5
+CIP_C5_MixerStage3;Boolean;Yes;0;C5: Мешалка этап 3 (слив);Ram;CIP/Cycles/C5
+CIP_C6_T_HOT_s;Long;Yes;0;C6: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C6
+CIP_C6_T_COLD_s;Long;Yes;0;C6: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C6
+CIP_C6_T_ALK_s;Long;Yes;0;C6: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C6
+CIP_C6_T_ACID_s;Long;Yes;0;C6: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C6
+CIP_C6_T_PUMP_s;Long;Yes;0;C6: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C6
+CIP_C6_T_DRAIN_s;Long;Yes;0;C6: Время слива, сек (этап 3);Ram;CIP/Cycles/C6
+CIP_C6_MixerStage1;Boolean;Yes;0;C6: Мешалка этап 1 (набор);Ram;CIP/Cycles/C6
+CIP_C6_MixerStage2;Boolean;Yes;0;C6: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C6
+CIP_C6_MixerStage3;Boolean;Yes;0;C6: Мешалка этап 3 (слив);Ram;CIP/Cycles/C6
+CIP_C7_T_HOT_s;Long;Yes;0;C7: Время горячей воды, сек (этап 1);Ram;CIP/Cycles/C7
+CIP_C7_T_COLD_s;Long;Yes;0;C7: Время холодной воды, сек (этап 1);Ram;CIP/Cycles/C7
+CIP_C7_T_ALK_s;Long;Yes;0;C7: Время щёлочи, сек (этап 1);Ram;CIP/Cycles/C7
+CIP_C7_T_ACID_s;Long;Yes;0;C7: Время кислоты, сек (этап 1);Ram;CIP/Cycles/C7
+CIP_C7_T_PUMP_s;Long;Yes;0;C7: Время циркуляции насоса, сек (этап 2);Ram;CIP/Cycles/C7
+CIP_C7_T_DRAIN_s;Long;Yes;0;C7: Время слива, сек (этап 3);Ram;CIP/Cycles/C7
+CIP_C7_MixerStage1;Boolean;Yes;0;C7: Мешалка этап 1 (набор);Ram;CIP/Cycles/C7
+CIP_C7_MixerStage2;Boolean;Yes;0;C7: Мешалка этап 2 (циркуляция);Ram;CIP/Cycles/C7
+CIP_C7_MixerStage3;Boolean;Yes;0;C7: Мешалка этап 3 (слив);Ram;CIP/Cycles/C7
+CIP_CMD_Valve_Cold_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Valve_Cold_ON → FB_ActuatorManager.CIP_Valve_Cold_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_Valve_Hot_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Valve_Hot_ON → FB_ActuatorManager.CIP_Valve_Hot_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_Valve_Alk_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Valve_Alk_ON → FB_ActuatorManager.CIP_Valve_Alk_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_Valve_Acid_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Valve_Acid_ON → FB_ActuatorManager.CIP_Valve_Acid_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_Pump_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Pump_ON → FB_ActuatorManager.CIP_Pump_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_DrainValve_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_DrainValve_ON → FB_ActuatorManager.CIP_DrainValve_ON;Ram;CIP/ActuatorLinks
+CIP_CMD_Mixer_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Mixer_ON → FB_ActuatorManager.CIP_Mixer_ON (или объединить с Pasteur);Ram;CIP/ActuatorLinks
+PAST_CircPump_ON;Boolean;No;0;Команда на циркуляционный насос ПАСТЕРИЗАТОРА.;Ram;PastOut
+PAST_Mixer_ON;Boolean;No;0;Команда на мешалку (прямой ход) от пастеризатора.;Ram;PastOut
+PAST_CoolingValve_ON;Boolean;No;0;Команда на клапан охлаждения рубашки (холодная вода).;Ram;PastOut
+PAST_HeatPowerReq;Boolean;No;0;Разрешение нагрева для блока управления температурой;Ram;PastOut
+PAST_StageMask;Boolean;No;0;Битовая маска этапов пастеризации (для HMI/диагностики), из FB_PasteurManager.StageMask_Pasteur.;Ram;PastOut
+TEMP_DO_Heater1_Cmd;Boolean;No;0;Команда нагрев 1 от TempMgr;Ram;Temp
+TEMP_DO_Heater2_Cmd;Boolean;No;0;Команда нагрев 2 от TempMgr;Ram;Temp
+TEMP_DO_Heater3_Cmd;Boolean;No;0;Команда нагрев 3 от TempMgr;Ram;Temp
+TEMP_AO_HeaterPower;Float;No;0;Мощность нагрева от TempMgr, %;Ram;Temp
+TEMP_PWM_Period_s;Long;Yes;30;Период ШИМ, сек;Ram;Temp
+TEMP_G2_StartPct;Float;Yes;60;Пороги включения групп 2/3 (каскад);Ram;Temp
+TEMP_G3_StartPct;Float;Yes;85;Пороги включения групп 2/3 (каскад);Ram;Temp
+HYST_OnBelow;Float;Yes;1;ВКЛ, если PV ≤ SP − OnBelow. Компенсация инерции. Реком.: 1.0 (0.5..1.5);Ram;Hyst
+PAR_FilterAlpha_x1000;Long;Yes;200;0..1000 → коэффициент альфа для IIR-фильтра (y:=y+α*(x−y));Ram;Hyst
+HYST_OffEarly;Float;Yes;0,3;ВЫКЛ, если PV ≥ SP − OffEarly (выключаем чуть НЕ доходя до SP). Реком.: 0.3 (0.2..0.6);Ram;Hyst
+HYST_MinOn_s;Long;Yes;30;Минимальное время ВКЛ (антидребезг). SSR: 2..5, контактор: 10..20;Ram;Hyst
+HYST_MinOff_s;Long;Yes;0;Минимальное время ВЫКЛ (антидребезг). SSR: 2..5, контактор: 10..20;Ram;Hyst
+HYST_Equilize_s;Long;Yes;15;ауза «уравновешивания» после ВЫКЛ (тепло от рубашки доходит до продукта).;Ram;Hyst
+SmoothDiffGuard;Float;Yes;5;Допустимая разница рубашка−продукт. Если PVjacket > PVprod + Guard → режем мощность. Реком.: 5.0;Ram;Hyst
+PAR_MaxDutyPct_JacketGuard;Float;Yes;20;Макс. duty при превышении SmoothDiffGuard (мягкий режим). Реком.: 20.0 (0..100);Ram;Hyst
+PAR_PID_Kp;Float;Yes;2;Пропорциональный коэффициент. Старт: 2.0 (подбирать по месту);Ram;PID
+PAR_PID_Ti;Float;Yes;120;Время интегрирования. 0 = без I. Старт: 120.0;Ram;PID
+PAR_PID_Td;Float;Yes;0;Время дифференцирования. 0 = без D. Старт: 0.0;Ram;PID

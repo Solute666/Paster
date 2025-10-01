@@ -1,0 +1,90 @@
+﻿VariableName;VariableType;Register;Comment;MetaType;CatalogPath
+Имя переменной;Тип переменной;Адрес регистра;Комментарий;Метатип;Путь в каталоге
+MB_Alarms;Long;512;Маска аварий (битовая, 16 бит);Network;HMI/Status
+MB_OutStateMask;Long;517;Маска состояний выходов;Network;HMI/Status
+MB_SystemStatus;Long;519;Статус системы (битовая маска: b0=Ручн., b1=Авто, b2=AlmActive, b3=Сброс треб.);Network;HMI/Status
+MB_TempProduct_x10;Long;513;Температура продукта, 0,1 °C;Network;HMI/PV
+MB_TempJacket_x10;Long;514;Температура рубашки, 0,1 °C;Network;HMI/PV
+MB_CIPStagesMask;Long;515;Маска этапов CIP;Network;HMI/Stages
+MB_PasteurStagesMask;Long;516;Маска этапов пастеризации;Network;HMI/Stages
+STEP_Pasteur;Long;545;Этап пастеризации (код);Network;HMI/Stages
+STEP_CIP;Long;546;Этап CIP (код);Network;HMI/Stages
+STEP_Dispense;Long;547;Этап розлива (код);Network;HMI/Stages
+MB_SetMixerFreq_0_1pct50;Long;518;Заданная частота ПЧ, 0,1% от 50 Гц;Network;HMI/Mixer
+PAR_MaxMixerSpeed_0_1pct50;Long;536;Ограничение скорости мешалки, 0,1% от 50 Гц;Network;HMI/Mixer
+MB_TimeModeDisplay;Long;520;Режим отображения времени (код);Network;HMI/Display
+MB_WashTimeMin;Long;521;Время мойки, минуты;Network;HMI/Display
+MB_WashTimeSec;Long;522;Время мойки, секунды;Network;HMI/Display
+SP_HeatTemp_x10;Long;523;Уставка пастеризации, 0,1 °C;Network;HMI/SP
+SP_HeatTime_min;Long;524;Ограничение времени нагрева, мин (0=выкл);Network;HMI/SP
+SP_SmoothTemp_x10;Long;525;Температура выравнивания, 0,1 °C;Network;HMI/SP
+SP_SmoothDiff_x10;Long;526;Дифференциал выравнивания, 0,1 °C;Network;HMI/SP
+SP_HoldTime_s;Long;527;Время выдержки, с;Network;HMI/SP
+SP_CoolTemp_x10;Long;568;Уставка охлаждения, 0,1 °C;Network;HMI/SP
+MB_CIP_Edit_T_COLD;Long;530;уставка «холодная вода», этап 1 (0 = не использовать);Network;HMI/CIP
+MB_CIP_Edit_T_ALK;Long;531;уставка «щёлочь», этап 1 (0 = не использовать);Network;HMI/CIP
+MB_CIP_Edit_T_ACID;Long;532;уставка «кислота», этап 1 (0 = не использовать);Network;HMI/CIP
+MB_CIP_Edit_T_PUMP;Long;533;уставка «циркуляция» (насос), этап 2;Network;HMI/CIP
+MB_CIP_Edit_SEL;Long;528;управление/статус редактора
+
+b0..b2 → CycleNo (1..7) — номер редактируемого цикла (0 = невалидно)
+
+b3 → Mixer_Stage1 (0/1) — мешалка на этапе 1
+
+b4 → Mixer_Stage2 (0/1) — мешалка на этапе 2
+
+b5 → Mixer_Stage3 (0/1) — мешалка на этапе 3
+
+b6 → ReadReq (HMI→PLC) — прочитать цикл (из RETAIN) в регистры 529…533 и 570
+
+b7 → WriteReq (HMI→PLC) — записать цикл из регистров 529…533 и 570 в RETAIN
+
+b8 → ReadMaskReq (HMI→PLC) — прочитать маску циклов выбранного режима (см. ModeSel) в 569
+
+b9 → WriteMaskReq (HMI→PLC) — записать маску из 569 в выбранный режим
+
+b10..b12 → ModeSel (0=нет, 1=Full, 2=Alk, 3=Acid, 4=Rinse) — какой режим редактируем (для масок)
+
+b13 → Ack (PLC→HMI) — квитирование (ПЛК инвертирует при выполнении любой команды)
+
+b14 → Busy (PLC→HMI) — обработка команды
+
+b15 → Error (PLC→HMI) — ошибка последней команды (подробности в статус-коде, если нужен — можно вывести на HMI из внутренней переменной);Network;HMI/CIP
+MB_CIP_Edit_T_HOT;Long;529;уставка «горячая вода», этап 1 (0 = не использовать);Network;HMI/CIP
+MB_CIP_Edit_MASK;Long;569;маска циклов выбранного режима (биты 0..6 → циклы 1..7  1 = выполнять);Network;HMI/CIP
+MB_CIP_Edit_T_DRAIN;Long;570;уставка «слив», этап 3;Network;HMI/CIP
+SP_DoseVolume_x100;Long;534;Розлив: объём дозы, л×100;Network;HMI/Dispense
+PAR_PumpFlowRate_x100;Long;535;Розлив: производительность насоса, л/с ×100;Network;HMI/Dispense
+PAR_HeaterPowerPct_0_1000;Long;537;Ограничение мощности нагрева, 0..1000=0..100%;Network;HMI/Params
+MB_ParMask;Long;538;Параметры (битовая маска): b0 UsePID  b1 UseVFD  b2 UsePortionButton  b3 UseGunSensor  b4 HeaterGrp2  b5 HeaterGrp3  b6 StoreEnabled  b16 PortionDone;Network;HMI/Params
+MB_ModeCurrent;Long;539;Текущий режим (0 Idle,1 Pasteur,2 Manual,3 CIP,4 Dispense,5 Recipe);Network;HMI/Mode
+MODE_Request;Long;540;Запрос режима (запись кодов как MB_ModeCurrent);Network;HMI/Mode
+MB_CmdMask1;Long;541;Команды 1 (битовая): b0 StartPasteur  b1 StopPasteur  b2 SkipHeat  b3 ResetAlarms  b4 StartDispCont  b5 StopDispCont  b6 StartDispDose  b7 StopDispDose  b8 NextDose  b15 = Reset SoftFlowmeter;Network;HMI/Commands
+MB_CmdMask2;Long;542;Команды 2 (ручные/CIP): b0 Mixer  b1 Heat1  b2 Heat2  b3 Cool  b4 MixerFWD  b5 MixerREV  b6 CIP Full  b7 CIP Alk  b8 CIP Acid  b9 CIP Rinse  b10 CIP Stop;Network;HMI/Commands
+MB_HMI_Heartbeat;Long;543;Сторожок HMI (панель инкрементирует);Network;HMI/Comm
+MB_PLC_Heartbeat;Long;544;Сторожок ПЛК (ПЛК инкрементирует);Network;HMI/Comm
+MB_CommFlags;Long;562;Связь (битовая): b0 HMI Online  b1 VFD Online;Network;HMI/Comm
+MB_Timer_StepSec;Long;548;Таймер этапа, прошедшее время, с;Network;HMI/Time
+MB_Timer_StepRemainSec;Long;549;Таймер этапа, оставшееся время, с;Network;HMI/Time
+MB_Timer_TotalSec;Long;550;Суммарное время цикла, с;Network;HMI/Time
+MB_PID_Out_0_1000;Long;551;Управление нагревом OUT, 0..1000=0..100%;Network;HMI/Trend
+MB_TempSP_Current_x10;Long;552;Текущая активная уставка температуры, 0,1 °C;Network;HMI/Trend
+MB_MixerHz_x0_01;Long;553;Фактическая частота ПЧ, 0,01 Гц (из master или аналогового канала);Network;HMI/Trend
+MB_RecipeIndex;Long;554;Выбранный рецепт (0..N-1);Network;HMI/Recipes
+MB_Rcp_HeatTemp_x10;Long;555;Редактор рецепта: уставка пастеризации, 0,1 °C;Network;HMI/Recipes
+MB_Rcp_HoldTime_s;Long;556;Редактор рецепта: выдержка, с;Network;HMI/Recipes
+MB_Rcp_SmoothTemp_x10;Long;557;Редактор рецепта: выравнивание, 0,1 °C;Network;HMI/Recipes
+MB_Rcp_CoolTemp_x10;Long;558;Редактор рецепта: охлаждение, 0,1 °C;Network;HMI/Recipes
+MB_Rcp_Apply;Long;559;Редактор рецепта: запись/применение (1-пульс);Network;HMI/Recipes
+MB_Alm_LatchMask;Long;560;Латч-маска аварий (для индикации);Network;HMI/Alarms
+MB_Clear_Latches;Long;561;Сброс латчей (1-пульс);Network;HMI/Alarms
+MB_ServiceCode;Long;563;Код для доступа к сервису (0..9999);Network;HMI/Service
+MB_BuildNumber;Long;564;Номер сборки прошивки/проекта;Network;HMI/Service
+MB_DataVersion;Long;565;Версия структуры данных;Network;HMI/Service
+MB_ManualMask;Long;566;Ручные включения (битовая маска для отображения);Network;HMI/Manual
+MB_OutInhibitMask;Long;567;Запреты на выходы (битовая маска);Network;HMI/Manual
+MB_ActiveModeCode;Long;571;Код активного режима: 0=нет, 1=Full, 2=Alk, 3=Acid, 4=Rinse;Network;HMI/Reserve
+MB_ActiveCyclNo;Long;572;Текущий цикл 1..7 (0=нет);Network;HMI/Reserve
+MB_ActiveStageNo;Long;573;Текущий этап 1..3 (0=нет);Network;HMI/Reserve
+MB_TimerStageNo;Long;574;Таймер текущего этапа, секунды;Network;HMI/Reserve
+MB_Reserved_8;Long;575;Резерв;Network;HMI/Reserve

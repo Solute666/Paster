@@ -1,0 +1,423 @@
+(*
+  FB_Main_PR102 — Главный блок для ПР102.
+  Ограничения типов: BOOL / UDINT / REAL, побитовый доступ reg.n
+
+  В этом варианте:
+  - Конвертация AI (UDINT ×10) → REAL и предварительный контроль обрыва/КЗ делаем в Main,
+    на TemperatureManager подаём уже проверенные *_Raw (REAL).
+  - Гистерезис больше не формируется в Main — он внутри TemperatureManager.
+*)
+
+FUNCTION_BLOCK FB_Main_PR102
+
+VAR_INPUT
+    Enable                   : BOOL;
+
+    // ДИСКРЕТНЫЕ ВХОДЫ
+    DI1_MixerFault           : BOOL;
+    DI2_HeaterFault          : BOOL;
+    DI3_LevelJacket          : BOOL;
+    DI4_PortionBtn           : BOOL;
+    DI5_GunSensor            : BOOL;
+    DI6_CIPFlowOK            : BOOL;   // НО датчик потока/наличия воды CIP: 1=норма, 0=нет воды
+    DI7_EStop                : BOOL;
+
+    // «Секундный тик»
+    Seconds_UD               : UDINT;
+
+    // СЕТЕВЫЕ ВХОДЫ (Slot 1)
+    MB_HMI_Heartbeat         : UDINT;  // 543
+    MB_CmdMask1              : UDINT;  // 541
+    MB_CmdMask2              : UDINT;  // 542
+    MODE_Request             : UDINT;  // 540 (резерв)
+    MB_ModeCurrent_in        : UDINT;  // 539 (резерв)
+    MB_ParMask_in            : UDINT;  // 538
+    MB_SP_DoseVolume_x100    : UDINT;  // 534 — доза, л×100 (HMI→PLC)
+    MB_PumpFlowRate_Lps_x100 : UDINT;  // — л/с×100 (HMI→PLC)
+
+    // Уставки (в физ. ед.)
+    SP_HeatTemp              : REAL;   // °C
+    SP_SmoothTemp            : REAL;   // °C
+    SP_SmoothDiff            : REAL;   // °C
+    SP_HoldTime_s            : UDINT;  // сек
+
+    // Измерения (фильтрованные от TemperatureManager)
+    PV_TempProduct           : REAL;   // °C
+    PV_TempJacket            : REAL;   // °C
+
+    // ПЧ
+    MB_SetMixerFreq_0_1pct50  : UDINT; // 518
+    PAR_MaxMixerSpeed_0_1pct50: UDINT; // 536
+    VFD_Mon_SetHz_x0_01       : UDINT;
+    VFD_Mon_RunHz_x0_01       : UDINT;
+
+    // Фактические DO (из Actuator)
+    DO1_ValveCold       : BOOL;
+    DO2_CircPump        : BOOL;
+    DO3_MixerFwd        : BOOL;
+    DO4_MixerRev        : BOOL;
+    DO5_PumpDisp        : BOOL;
+    DO6_Heater1         : BOOL;
+    DO7_Heater2         : BOOL;
+    DO8_Heater3         : BOOL;
+    DO9_ValveCIP_Cold   : BOOL;
+    DO10_ValveCIP_Hot   : BOOL;
+    DO11_ValveAlk       : BOOL;
+    DO12_ValveAcid      : BOOL;
+    DO13_PumpCIP        : BOOL;
+    DO14_ValveDrain     : BOOL;
+
+    // Событие от дозатора
+    Dosing_PortionDone  : BOOL;
+
+    // ===== Входы AI (×10) для конвертации в Main =====
+    AI_TempProduct_x10_UD : UDINT;   // продукт, °C×10 (из АЦП/сети)
+    AI_TempJacket_x10_UD  : UDINT;   // рубашка, °C×10 (из АЦП/сети)
+
+    // ===== Из PasteurManager: требование мощности нагрева (PID → %-мощность) =====
+    HeatingPowerReq_IN     : REAL;   // −1.0 = выключить нагрев, иначе 0..300 (% каскад по группам)
+END_VAR
+
+VAR_OUTPUT
+    EnableOut                : BOOL;
+
+    // Диагностика/связь
+    MB_PLC_Heartbeat         : UDINT;  // 544
+    HMI_alive                : BOOL;
+
+    // PV → сеть (x10, UDINT)
+    MB_TempProduct_x10       : UDINT;  // 513
+    MB_TempJacket_x10        : UDINT;  // 514
+
+    // Распакованные параметры + эхо маски
+    PAR_UsePID              : BOOL;    // b0
+    PAR_UseVFD              : BOOL;    // b1
+    PAR_UsePortionButton    : BOOL;    // b2
+    PAR_UseGunSensor        : BOOL;    // b3
+    PAR_HeaterGroup2Enabled : BOOL;    // b4
+    PAR_HeaterGroup3Enabled : BOOL;    // b5
+    PAR_StoreEnabled        : BOOL;    // b6
+    MB_ParMask              : UDINT;   // эхо + статусы PLC
+
+    // Пересчитанные уставки/параметры
+    SP_DoseVolume_R         : REAL;    // л (из x100)
+    PAR_PumpFlowRate_Lps    : REAL;    // л/с (из x100)
+
+    // Маски и статусы
+    MB_Alarms               : UDINT;   // 512
+    ALM_Mask_UD             : UDINT;
+    STAT_OutStateMask       : UDINT;
+    MB_OutStateMask         : UDINT;   // 517
+
+    // Локальные команды (без сети)
+    CMD_Stop                : BOOL;    // аварийный стоп (Variant A: только E-Stop)
+    ALM_NoWater             : BOOL;    // «нет воды» для CIPManager
+
+    // Режимы/стадии
+    MB_ModeCurrent          : UDINT;   // 539 — ТЕКУЩИЙ ВЫБРАННЫЙ РЕЖИМ (арбитраж)
+    STEP_Pasteur            : UDINT;   // 545
+    STEP_CIP                : UDINT;   // 546
+    STEP_Dispense           : UDINT;   // 547
+    MB_PasteurStagesMask    : UDINT;   // 516
+    MB_CIPStagesMask        : UDINT;   // 515
+
+    // ПЧ
+    VFD_SetFreqPct_UD       : UDINT;
+    VFD_SetHz               : REAL;
+    VFD_RunHz               : REAL;
+
+    // РЕЖИМЫ (уже после арбитража!)
+    Mode_Pasteur_RunReq    : BOOL; // b0
+    CMD_SkipHeatStage      : BOOL; // b2 (зеркало)
+    CMD_ResetAlarms        : BOOL; // b3 (зеркало)
+    Mode_DispCont_RunReq   : BOOL; // b4
+    Mode_DispDose_RunReq   : BOOL; // b6
+    CMD_NextDose           : BOOL; // b8 (зеркало)
+    Mode_CIP_Full_RunReq   : BOOL; // b9
+    Mode_CIP_Alk_RunReq    : BOOL; // b10
+    Mode_CIP_Acid_RunReq   : BOOL; // b11
+    Mode_CIP_Rinse_RunReq  : BOOL; // b12
+    CMD_ResetSoftFlow      : BOOL; // b15 — сброс софт-расходомера (зеркало)
+
+    // ===== Выходы для TemperatureManager (RAW + задание мощности) =====
+    PV_TempProduct_Raw     : REAL;   // °C, из ×10 (валидные)
+    PV_TempJacket_Raw      : REAL;   // °C, из ×10 (валидные)
+    HeaterPowerPct_toTemp  : REAL;   // −1.0 вне режима пастеризации, иначе passthrough от HeatingPowerReq_IN
+
+    // ===== Для PasteurManager =====
+    RecipeMode             : BOOL;   // режим «поэтапный» (из ParMask.b7)
+    CMD_Resume             : BOOL;   // импульс «продолжить» (CmdMask1.b5 фронт)
+    
+        // Ручные пуски DO (MB_CmdMask2)
+    Man1_ValveCold       : BOOL; // b0
+    Man2_CircPump        : BOOL; // b1
+    Man3_MixerFwd        : BOOL; // b2
+    Man4_MixerRev        : BOOL; // b3
+    Man5_PumpDisp        : BOOL; // b4
+    Man6_Heater1         : BOOL; // b5
+    Man7_Heater2         : BOOL; // b6
+    Man8_Heater3         : BOOL; // b7
+    Man9_ValveCIP_Cold   : BOOL; // b8
+    Man10_ValveCIP_Hot   : BOOL; // b9
+    Man11_ValveAlk       : BOOL; // b10
+    Man12_ValveAcid      : BOOL; // b11
+    Man13_PumpCIP        : BOOL; // b12
+    Man14_ValveDrain     : BOOL; // b13
+
+END_VAR
+
+VAR
+    lastSec_UD           : UDINT := 0;
+    hmiBeatPrev_UD       : UDINT := 0;
+    hmiLastChangeSec_UD  : UDINT := 0;
+
+    doMaskUD             : UDINT;
+    almMaskUD            : UDINT;
+
+    tmpR                 : REAL;
+
+    // Латч PortionDone → b16 ParMask (держим ~1 c)
+    pd_latch             : BOOL  := FALSE;
+    pd_expire_sec        : UDINT := 0;
+
+    doseR                : REAL := 0.0;
+
+    // Импульсообразователь для CMD_Resume
+    prevResumeLevel      : BOOL := FALSE;
+
+    // ===== Арбитраж режимов =====
+    ActiveMode_UD        : UDINT := 0;   // 0=NONE, 1=PASTEUR, 2=DISP_CONT, 3=DISP_DOSE, 10=CIP_FULL, 11=CIP_ALK, 12=CIP_ACID, 13=CIP_RINSE
+    reqPasteur           : BOOL;
+    reqDispCont          : BOOL;
+    reqDispDose          : BOOL;
+    reqCIP_Full          : BOOL;
+    reqCIP_Alk           : BOOL;
+    reqCIP_Acid          : BOOL;
+    reqCIP_Rinse         : BOOL;
+
+    // ===== Контроль валидности датчиков (до TemperatureManager) =====
+    ALM_TempProdBad      : BOOL := FALSE;
+    ALM_TempJacketBad    : BOOL := FALSE;
+    prodC_ok             : REAL := 20.0;   // последняя валидная T продукта
+    jackC_ok             : REAL := 20.0;   // последняя валидная T рубашки
+    TEMP_MIN_C           : REAL := -50.0;  // допустимый диапазон
+    TEMP_MAX_C           : REAL := 150.0;
+END_VAR
+
+// ===== HEARTBEAT ПЛК =====
+IF Seconds_UD <> lastSec_UD THEN
+    lastSec_UD := Seconds_UD;
+    MB_PLC_Heartbeat := MB_PLC_Heartbeat + 1;
+END_IF;
+
+// ===== ONLINE ПАНЕЛИ ПО HEARTBEAT =====
+IF MB_HMI_Heartbeat <> hmiBeatPrev_UD THEN
+    hmiBeatPrev_UD := MB_HMI_Heartbeat;
+    hmiLastChangeSec_UD := Seconds_UD;
+END_IF;
+HMI_alive := (Seconds_UD - hmiLastChangeSec_UD) < 6;
+
+// ===== Пересчёт AI ×10 → REAL (°C) + контроль обрыва/КЗ (до TempManager) =====
+tmpR := UDINT_TO_REAL(AI_TempProduct_x10_UD) / 10.0;
+ALM_TempProdBad := (tmpR < TEMP_MIN_C) OR (tmpR > TEMP_MAX_C);
+IF NOT ALM_TempProdBad THEN
+    prodC_ok := tmpR;                 // обновить «последнее корректное»
+END_IF;
+PV_TempProduct_Raw := prodC_ok;       // в TemperatureManager подаём только валидное
+
+tmpR := UDINT_TO_REAL(AI_TempJacket_x10_UD) / 10.0;
+ALM_TempJacketBad := (tmpR < TEMP_MIN_C) OR (tmpR > TEMP_MAX_C);
+IF NOT ALM_TempJacketBad THEN
+    jackC_ok := tmpR;
+END_IF;
+PV_TempJacket_Raw := jackC_ok;
+
+// ===== PV → сеть (x10, UDINT) (фильтрованные значения от TempManager) =====
+tmpR := PV_TempProduct * 10.0;  IF tmpR < 0.0 THEN tmpR := 0.0; END_IF;
+MB_TempProduct_x10 := REAL_TO_UDINT(tmpR);
+tmpR := PV_TempJacket  * 10.0;  IF tmpR < 0.0 THEN tmpR := 0.0; END_IF;
+MB_TempJacket_x10  := REAL_TO_UDINT(tmpR);
+
+// ===== РАЗБОР MB_ParMask_in (r.538) =====
+PAR_UsePID              := MB_ParMask_in.0;
+PAR_UseVFD              := MB_ParMask_in.1;
+PAR_UsePortionButton    := MB_ParMask_in.2;
+PAR_UseGunSensor        := MB_ParMask_in.3;
+PAR_HeaterGroup2Enabled := MB_ParMask_in.4;
+PAR_HeaterGroup3Enabled := MB_ParMask_in.5;
+PAR_StoreEnabled        := MB_ParMask_in.6;
+// Режим «рецептурный»
+RecipeMode              := MB_ParMask_in.7;
+
+// ===== Латч PortionDone → MB_ParMask.b16 =====
+IF Dosing_PortionDone THEN
+    pd_latch := TRUE;
+    pd_expire_sec := Seconds_UD + 1; // держим 1 с
+END_IF;
+IF pd_latch AND (Seconds_UD >= pd_expire_sec) THEN
+    pd_latch := FALSE;
+END_IF;
+
+// Сборка выходной маски параметров (эхо + статусы PLC)
+MB_ParMask := MB_ParMask_in;
+MB_ParMask.16 := pd_latch;  // b16 = PortionDone (PLC→HMI)
+
+// ===== ЛОГИКА АВАРИЙ (включая ALM_NoWater и датчики температуры) =====
+ALM_NoWater := NOT DI6_CIPFlowOK;          // 1 = нет воды/потока в контуре CIP
+
+almMaskUD := 0;
+almMaskUD.0 := NOT DI7_EStop;              // E-Stop (НЗ): 1 = авария
+almMaskUD.1 := DI1_MixerFault;             // Мешалка/ПЧ авария
+almMaskUD.2 := DI2_HeaterFault;            // ТЭН/термореле
+almMaskUD.3 := NOT DI3_LevelJacket;        // Нет уровня рубашки
+almMaskUD.4 := PV_TempJacket > (SP_HeatTemp + 15.0); // Перегрев рубашки
+almMaskUD.5 := ALM_NoWater;                // Нет воды в контуре CIP
+almMaskUD.6 := ALM_TempProdBad;            // Датчик продукта обрыв/КЗ/вне диапазона
+almMaskUD.7 := ALM_TempJacketBad;          // Датчик рубашки обрыв/КЗ/вне диапазона
+
+ALM_Mask_UD := almMaskUD;
+MB_Alarms   := almMaskUD;
+
+// Локальный аварийный стоп (по E-Stop)
+CMD_Stop := almMaskUD.0;
+
+// ===== Маска состояний выходов =====
+doMaskUD := 0;
+doMaskUD.0  := DO1_ValveCold;
+doMaskUD.1  := DO2_CircPump;
+doMaskUD.2  := DO3_MixerFwd;
+doMaskUD.3  := DO4_MixerRev;
+doMaskUD.4  := DO5_PumpDisp;
+doMaskUD.5  := DO6_Heater1;
+doMaskUD.6  := DO7_Heater2;
+doMaskUD.7  := DO8_Heater3;
+doMaskUD.8  := DO9_ValveCIP_Cold;
+doMaskUD.9  := DO10_ValveCIP_Hot;
+doMaskUD.10 := DO11_ValveAlk;
+doMaskUD.11 := DO12_ValveAcid;
+doMaskUD.12 := DO13_PumpCIP;
+doMaskUD.13 := DO14_ValveDrain;
+STAT_OutStateMask := doMaskUD;
+MB_OutStateMask   := doMaskUD;
+
+// ===== РАСПАКОВКА МАСОК КОМАНД (зеркала) =====
+// MB_CmdMask1 (541)
+reqPasteur        := MB_CmdMask1.0;
+CMD_SkipHeatStage := MB_CmdMask1.2;
+CMD_ResetAlarms   := MB_CmdMask1.3;
+reqDispCont       := MB_CmdMask1.4;
+reqDispDose       := MB_CmdMask1.6;
+CMD_NextDose      := MB_CmdMask1.8;
+reqCIP_Full       := MB_CmdMask1.9;
+reqCIP_Alk        := MB_CmdMask1.10;
+reqCIP_Acid       := MB_CmdMask1.11;
+reqCIP_Rinse      := MB_CmdMask1.12;
+CMD_ResetSoftFlow := MB_CmdMask1.15;  // сброс софт-расходомера
+
+// Импульс «Продолжить» (Resume) с фронта b5
+CMD_Resume := (MB_CmdMask1.5 AND NOT prevResumeLevel);
+prevResumeLevel := MB_CmdMask1.5;
+
+// ===== АРБИТРАЖ РЕЖИМОВ (взаимоисключение) =====
+// Приоритет если ActiveMode_UD=0: CIP Full > CIP Alk > CIP Acid > CIP Rinse > Pasteur > DispDose > DispCont
+IF (ActiveMode_UD = 0) THEN
+    IF reqCIP_Full THEN
+        ActiveMode_UD := 10;
+    ELSIF reqCIP_Alk THEN
+        ActiveMode_UD := 11;
+    ELSIF reqCIP_Acid THEN
+        ActiveMode_UD := 12;
+    ELSIF reqCIP_Rinse THEN
+        ActiveMode_UD := 13;
+    ELSIF reqPasteur THEN
+        ActiveMode_UD := 1;
+    ELSIF reqDispDose THEN
+        ActiveMode_UD := 3;
+    ELSIF reqDispCont THEN
+        ActiveMode_UD := 2;
+    ELSE
+        ActiveMode_UD := 0; // нет запросов
+    END_IF;
+ELSE
+    // Удержание текущего режима до снятия своего run-бита или аварийного STOP
+    CASE ActiveMode_UD OF
+        1:  IF (NOT reqPasteur)   OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // Pasteur
+        2:  IF (NOT reqDispCont)  OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // DispCont
+        3:  IF (NOT reqDispDose)  OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // DispDose
+        10: IF (NOT reqCIP_Full)  OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // CIP Full
+        11: IF (NOT reqCIP_Alk)   OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // CIP Alk
+        12: IF (NOT reqCIP_Acid)  OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // CIP Acid
+        13: IF (NOT reqCIP_Rinse) OR CMD_Stop THEN ActiveMode_UD := 0; END_IF;  // CIP Rinse
+        ELSE ActiveMode_UD := 0;
+    END_CASE;
+END_IF;
+
+// Выход: текущий режим на HMI/сеть
+MB_ModeCurrent := ActiveMode_UD;
+
+// Формирование арбитрованных run-запросов для менеджеров
+Mode_Pasteur_RunReq   := (ActiveMode_UD = 1)  AND reqPasteur;
+Mode_DispCont_RunReq  := (ActiveMode_UD = 2)  AND reqDispCont;
+Mode_DispDose_RunReq  := (ActiveMode_UD = 3)  AND reqDispDose;
+Mode_CIP_Full_RunReq  := (ActiveMode_UD = 10) AND reqCIP_Full;
+Mode_CIP_Alk_RunReq   := (ActiveMode_UD = 11) AND reqCIP_Alk;
+Mode_CIP_Acid_RunReq  := (ActiveMode_UD = 12) AND reqCIP_Acid;
+Mode_CIP_Rinse_RunReq := (ActiveMode_UD = 13) AND reqCIP_Rinse;
+
+// ===== Подача %-мощности в TemperatureManager (passthrough) =====
+IF Mode_Pasteur_RunReq THEN
+    HeaterPowerPct_toTemp := HeatingPowerReq_IN;  // passthrough, REAL
+ELSE
+    HeaterPowerPct_toTemp := -1.0;                // выключить нагрев вне режима пастеризации
+END_IF;
+
+// ===== MB_CmdMask2 (542) — ручные DO (1:1 с DO) =====
+Man1_ValveCold       := MB_CmdMask2.0;
+Man2_CircPump        := MB_CmdMask2.1;
+Man3_MixerFwd        := MB_CmdMask2.2;
+Man4_MixerRev        := MB_CmdMask2.3;
+Man5_PumpDisp        := MB_CmdMask2.4;
+Man6_Heater1         := MB_CmdMask2.5;
+Man7_Heater2         := MB_CmdMask2.6;
+Man8_Heater3         := MB_CmdMask2.7;
+Man9_ValveCIP_Cold   := MB_CmdMask2.8;
+Man10_ValveCIP_Hot   := MB_CmdMask2.9;
+Man11_ValveAlk       := MB_CmdMask2.10;
+Man12_ValveAcid      := MB_CmdMask2.11;
+Man13_PumpCIP        := MB_CmdMask2.12;
+Man14_ValveDrain     := MB_CmdMask2.13;
+
+// ===== ПЧ: ограничение задания и мониторы =====
+IF MB_SetMixerFreq_0_1pct50 > PAR_MaxMixerSpeed_0_1pct50 THEN
+    VFD_SetFreqPct_UD := PAR_MaxMixerSpeed_0_1pct50;
+ELSE
+    VFD_SetFreqPct_UD := MB_SetMixerFreq_0_1pct50;
+END_IF;
+VFD_SetHz := UDINT_TO_REAL(VFD_Mon_SetHz_x0_01) / 100.0;
+VFD_RunHz := UDINT_TO_REAL(VFD_Mon_RunHz_x0_01) / 100.0;
+
+// ===== Пересчёты из сети =====
+// Доза: UDINT (л×100) → REAL (л)
+doseR := UDINT_TO_REAL(MB_SP_DoseVolume_x100) / 100.0;
+IF doseR < 0.0 THEN doseR := 0.0; END_IF;
+IF doseR > 10000.0 THEN doseR := 10000.0; END_IF;
+SP_DoseVolume_R := doseR;
+
+// Производительность насоса: UDINT (л/с×100) → REAL (л/с)
+PAR_PumpFlowRate_Lps := UDINT_TO_REAL(MB_PumpFlowRate_Lps_x100) / 100.0;
+IF PAR_PumpFlowRate_Lps < 0.0 THEN PAR_PumpFlowRate_Lps := 0.0; END_IF;
+
+//
+// Стадии/зеркала — заглушки
+//
+STEP_Pasteur         := 0;
+STEP_CIP             := 0;
+STEP_Dispense        := 0;
+MB_PasteurStagesMask := 0;
+MB_CIPStagesMask     := 0;
+// MB_ModeCurrent уже формируется из арбитража выше
+
+// Разрешение
+EnableOut := Enable;
+
+END_FUNCTION_BLOCK

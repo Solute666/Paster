@@ -29,7 +29,7 @@ VAR_OUTPUT
     CircPump_ON       : BOOL;  // → DO2_CircPump
     Mixer_ON          : BOOL;  // → DO3_MixerFwd
     CoolingValve_ON   : BOOL;  // → DO1_ValveCold
-    HeatingPowerReq   : BOOL;  // → FB_TemperatureManager.Pasteur_HeatEnable
+    Pasteur_HeatEnable : BOOL;  // → FB_TemperatureManager.Pasteur_HeatEnable
     HeatTargetTemp    : REAL;  // → FB_TemperatureManager.SP_TempTarget
 
     // Диагностика стадий
@@ -69,7 +69,7 @@ IF NOT init_done THEN
     CircPump_ON := FALSE;
     Mixer_ON := FALSE;
     CoolingValve_ON := FALSE;
-    HeatingPowerReq := FALSE;
+    Pasteur_HeatEnable := FALSE;
     HeatTargetTemp := SP_HeatTemp;
 
     StageMask_Pasteur := 0;
@@ -92,7 +92,7 @@ StageMask_Pasteur := 0;
 HoldElapsed_s := holdSec;
 HoldCompleted := holdDone;
 
-heatEnableState := HeatingPowerReq; // сохранить предыдущее состояние нагрева
+heatEnableState := Pasteur_HeatEnable; // сохранить предыдущее состояние нагрева
 
 // ---------- Общий стоп/сброс ----------
 IF (NOT RunReq) OR CMD_Stop THEN
@@ -264,6 +264,6 @@ END_IF;
 Stage_Current := stage;
 HoldElapsed_s := holdSec;
 HoldCompleted := holdDone;
-HeatingPowerReq := heatEnableState;
+Pasteur_HeatEnable := heatEnableState;
 
 END_FUNCTION_BLOCK

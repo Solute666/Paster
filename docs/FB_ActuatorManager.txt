@@ -4,7 +4,7 @@ VAR_INPUT
     Pasteur_CircPump_ON     : BOOL;
     Pasteur_Mixer_ON        : BOOL;
     Pasteur_CoolingValve_ON : BOOL;
-    Pasteur_HeatPowerReq    : REAL;
+    Pasteur_HeatEnable      : BOOL;
 
     // Команды от CIPManager:
     CIP_Valve_Cold_ON  : BOOL;  // холодная вода (CIP)

@@ -31,6 +31,7 @@ VAR_OUTPUT
     CoolingValve_ON   : BOOL;  // → DO1_ValveCold
 
     HeatTargetTemp    : REAL;  // → FB_TemperatureManager.SP_TempTarget
+    Pasteur_HeatEnable: BOOL;  // → FB_ActuatorManager.Pasteur_HeatEnable
 
     // Диагностика стадий
     StageMask_Pasteur : UDINT; // бит0..бит5: HEAT,HOLD,COOL,EQUALIZE,STORE,DONE
@@ -47,8 +48,9 @@ VAR
     holdDone         : BOOL  := FALSE;
     mixSec           : UDINT := 0;   // время вымешивания/выравнивания, с
     heatEnableState  : BOOL  := FALSE; // внутренний флаг разрешения нагрева
+END_VAR
 
-    // «Константы» стадий (не менять в ходе программы)
+VAR CONSTANT
     STAGE_IDLE       : USINT := 0;
     STAGE_HEAT       : USINT := 1;
     STAGE_HOLD       : USINT := 2;
@@ -57,6 +59,13 @@ VAR
     STAGE_STORE      : USINT := 5;
     STAGE_DONE       : USINT := 6;
     STAGE_PAUSE      : USINT := 7;   // логически соответствует StageMask биту HOLD
+
+    STAGEMASK_HEAT       : UDINT := 16#0001;
+    STAGEMASK_HOLD       : UDINT := 16#0002;
+    STAGEMASK_COOL       : UDINT := 16#0004;
+    STAGEMASK_EQUALIZE   : UDINT := 16#0008;
+    STAGEMASK_STORE      : UDINT := 16#0010;
+    STAGEMASK_DONE       : UDINT := 16#0020;
 END_VAR
 
 // ---------- Инициализация ----------
@@ -91,8 +100,6 @@ StageMask_Pasteur := 0;
 HoldElapsed_s := holdSec;
 HoldCompleted := holdDone;
 
-heatEnableState := Pasteur_HeatEnable; // сохранить предыдущее состояние нагрева
-
 // ---------- Общий стоп/сброс ----------
 IF (NOT RunReq) OR CMD_Stop THEN
     stage := STAGE_IDLE;
@@ -109,6 +116,8 @@ ELSE
     CASE stage OF
 
         STAGE_IDLE:
+            heatEnableState := FALSE;
+
             IF CMD_SkipHeat THEN
                 stage := STAGE_HOLD;
                 holdSec := 0; holdDone := FALSE;
@@ -120,7 +129,7 @@ ELSE
             END_IF;
 
         STAGE_HEAT:
-            StageMask_Pasteur.0 := TRUE;
+            StageMask_Pasteur := STAGEMASK_HEAT;
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -134,7 +143,7 @@ ELSE
             END_IF;
 
         STAGE_HOLD:
-            StageMask_Pasteur.1 := TRUE;
+            StageMask_Pasteur := STAGEMASK_HOLD;
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -167,7 +176,7 @@ ELSE
             END_IF;
 
         STAGE_PAUSE:
-            StageMask_Pasteur.1 := TRUE; // визуально «выдержка»
+            StageMask_Pasteur := STAGEMASK_HOLD; // визуально «выдержка»
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -188,7 +197,7 @@ ELSE
             END_IF;
 
         STAGE_COOL:
-            StageMask_Pasteur.2 := TRUE;
+            StageMask_Pasteur := STAGEMASK_COOL;
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -208,7 +217,7 @@ ELSE
             END_IF;
 
         STAGE_EQUALIZE:
-            StageMask_Pasteur.3 := TRUE;
+            StageMask_Pasteur := STAGEMASK_EQUALIZE;
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -228,7 +237,7 @@ ELSE
             END_IF;
 
         STAGE_STORE:
-            StageMask_Pasteur.4 := TRUE;
+            StageMask_Pasteur := STAGEMASK_STORE;
 
             CircPump_ON := TRUE;
             Mixer_ON := TRUE;
@@ -246,7 +255,7 @@ ELSE
             END_IF;
 
         STAGE_DONE:
-            StageMask_Pasteur.5 := TRUE;
+            StageMask_Pasteur := STAGEMASK_DONE;
 
             CircPump_ON := FALSE;
             Mixer_ON := FALSE;

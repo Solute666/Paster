@@ -22,7 +22,7 @@ VAR_INPUT
     Temp_DO_Heater1_Cmd : BOOL;
     Temp_DO_Heater2_Cmd : BOOL;
     Temp_DO_Heater3_Cmd : BOOL;
-    Temp_AO_HeaterPower : REAL;
+    Temp_AO_HeaterPower : REAL; // в % (0..100) от FB_TemperatureManager
 
     // Mixer/VFD (на будущее):
     VFD_MixerRunReq    : BOOL;
@@ -77,7 +77,7 @@ VAR_OUTPUT
     DO14_ValveDrain     : BOOL;
 
     // — Аналог —
-    AO_1  : REAL;       // мощность нагрева 0..10 В
+    AO_1  : REAL;       // мощность нагрева 0..10 В (масштаб 0..1000 в FB_ActuatorManager)
     AO_2  : REAL;       // резерв / «старт» (если не VFD)
 END_VAR
 
@@ -155,7 +155,9 @@ IF NOT BLOCK_AllOff THEN
         DO6_Heater1 := Temp_DO_Heater1_Cmd;
         DO7_Heater2 := Temp_DO_Heater2_Cmd;
         DO8_Heater3 := Temp_DO_Heater3_Cmd;
-        AO_1 := Temp_AO_HeaterPower;
+        // TempManager отдаёт % (0..100), умножаем до 0..1000 для аналогового выхода.
+        // В HMI/конфигурации AO ожидаем диапазон 0..1000 (0..10 В) — проверено на соответствие.
+        AO_1 := Temp_AO_HeaterPower * 10.0;
     END_IF;
 
     // DO9..DO14 — CIP-исполнительные механизмы

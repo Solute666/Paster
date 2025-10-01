@@ -86,6 +86,8 @@ VAR_OUTPUT
     // Диагностика/связь
     MB_PLC_Heartbeat         : UDINT;  // 544
     HMI_alive                : BOOL;
+    MB_CmdMask1_Ack          : UDINT;  // отквитированная маска команд 1 (541)
+    MB_CmdMask2_Ack          : UDINT;  // отквитированная маска команд 2 (542)
 
     // PV → сеть (x10, UDINT)
     MB_TempProduct_x10       : UDINT;  // 513
@@ -180,6 +182,11 @@ VAR
 
     tmpR                 : REAL;
 
+    cmdMask1_local       : UDINT;
+    cmdMask2_local       : UDINT;
+    cmdResumeLevel       : BOOL := FALSE;
+    cmdResetSoftFlowLvl  : BOOL := FALSE;
+
     // Латч PortionDone → b16 ParMask (держим ~1 c)
     pd_latch             : BOOL  := FALSE;
     pd_expire_sec        : UDINT := 0;
@@ -196,6 +203,7 @@ VAR
 
     // Импульсообразователь для CMD_Resume
     prevResumeLevel      : BOOL := FALSE;
+    prevResetSoftFlowLvl : BOOL := FALSE;
 
     // ===== Арбитраж режимов =====
     ActiveMode_UD        : UDINT := 0;   // 0=NONE, 1=PASTEUR, 2=DISP_CONT, 3=DISP_DOSE, 10=CIP_FULL, 11=CIP_ALK, 12=CIP_ACID, 13=CIP_RINSE
@@ -357,22 +365,41 @@ END_IF;
 STAT_HeatTimeout := heatTimeoutActive;
 
 // ===== РАСПАКОВКА МАСОК КОМАНД (зеркала) =====
-// MB_CmdMask1 (541)
-reqPasteur        := MB_CmdMask1.0;
-CMD_SkipHeatStage := MB_CmdMask1.2;
-CMD_ResetAlarms   := MB_CmdMask1.3;
-reqDispCont       := MB_CmdMask1.4;
-reqDispDose       := MB_CmdMask1.6;
-CMD_NextDose      := MB_CmdMask1.8;
-reqCIP_Full       := MB_CmdMask1.9;
-reqCIP_Alk        := MB_CmdMask1.10;
-reqCIP_Acid       := MB_CmdMask1.11;
-reqCIP_Rinse      := MB_CmdMask1.12;
-CMD_ResetSoftFlow := MB_CmdMask1.15;  // сброс софт-расходомера
+cmdMask1_local := MB_CmdMask1;
+cmdMask2_local := MB_CmdMask2;
 
-// Импульс «Продолжить» (Resume) с фронта b5
-CMD_Resume := (MB_CmdMask1.5 AND NOT prevResumeLevel);
-prevResumeLevel := MB_CmdMask1.5;
+// MB_CmdMask1 (541)
+reqPasteur        := cmdMask1_local.0;
+IF reqPasteur THEN cmdMask1_local.0 := FALSE; END_IF;
+CMD_SkipHeatStage := cmdMask1_local.2;
+IF CMD_SkipHeatStage THEN cmdMask1_local.2 := FALSE; END_IF;
+CMD_ResetAlarms   := cmdMask1_local.3;
+IF CMD_ResetAlarms THEN cmdMask1_local.3 := FALSE; END_IF;
+reqDispCont       := cmdMask1_local.4;
+IF reqDispCont THEN cmdMask1_local.4 := FALSE; END_IF;
+reqDispDose       := cmdMask1_local.6;
+IF reqDispDose THEN cmdMask1_local.6 := FALSE; END_IF;
+CMD_NextDose      := cmdMask1_local.8;
+IF CMD_NextDose THEN cmdMask1_local.8 := FALSE; END_IF;
+reqCIP_Full       := cmdMask1_local.9;
+IF reqCIP_Full THEN cmdMask1_local.9 := FALSE; END_IF;
+reqCIP_Alk        := cmdMask1_local.10;
+IF reqCIP_Alk THEN cmdMask1_local.10 := FALSE; END_IF;
+reqCIP_Acid       := cmdMask1_local.11;
+IF reqCIP_Acid THEN cmdMask1_local.11 := FALSE; END_IF;
+reqCIP_Rinse      := cmdMask1_local.12;
+IF reqCIP_Rinse THEN cmdMask1_local.12 := FALSE; END_IF;
+
+// Импульсы «Resume» и «ResetSoftFlow» обрабатываем по фронту
+cmdResumeLevel := cmdMask1_local.5;
+CMD_Resume := (cmdResumeLevel AND NOT prevResumeLevel);
+IF cmdResumeLevel THEN cmdMask1_local.5 := FALSE; END_IF;
+prevResumeLevel := cmdResumeLevel;
+
+cmdResetSoftFlowLvl := cmdMask1_local.15;
+CMD_ResetSoftFlow := (cmdResetSoftFlowLvl AND NOT prevResetSoftFlowLvl);  // сброс софт-расходомера
+IF cmdResetSoftFlowLvl THEN cmdMask1_local.15 := FALSE; END_IF;
+prevResetSoftFlowLvl := cmdResetSoftFlowLvl;
 
 // ===== АРБИТРАЖ РЕЖИМОВ (взаимоисключение) =====
 // Приоритет если ActiveMode_UD=0: CIP Full > CIP Alk > CIP Acid > CIP Rinse > Pasteur > DispDose > DispCont
@@ -428,20 +455,38 @@ ELSE
 END_IF;
 
 // ===== MB_CmdMask2 (542) — ручные DO (1:1 с DO) =====
-Man1_ValveCold       := MB_CmdMask2.0;
-Man2_CircPump        := MB_CmdMask2.1;
-Man3_MixerFwd        := MB_CmdMask2.2;
-Man4_MixerRev        := MB_CmdMask2.3;
-Man5_PumpDisp        := MB_CmdMask2.4;
-Man6_Heater1         := MB_CmdMask2.5;
-Man7_Heater2         := MB_CmdMask2.6;
-Man8_Heater3         := MB_CmdMask2.7;
-Man9_ValveCIP_Cold   := MB_CmdMask2.8;
-Man10_ValveCIP_Hot   := MB_CmdMask2.9;
-Man11_ValveAlk       := MB_CmdMask2.10;
-Man12_ValveAcid      := MB_CmdMask2.11;
-Man13_PumpCIP        := MB_CmdMask2.12;
-Man14_ValveDrain     := MB_CmdMask2.13;
+Man1_ValveCold       := cmdMask2_local.0;
+IF Man1_ValveCold THEN cmdMask2_local.0 := FALSE; END_IF;
+Man2_CircPump        := cmdMask2_local.1;
+IF Man2_CircPump THEN cmdMask2_local.1 := FALSE; END_IF;
+Man3_MixerFwd        := cmdMask2_local.2;
+IF Man3_MixerFwd THEN cmdMask2_local.2 := FALSE; END_IF;
+Man4_MixerRev        := cmdMask2_local.3;
+IF Man4_MixerRev THEN cmdMask2_local.3 := FALSE; END_IF;
+Man5_PumpDisp        := cmdMask2_local.4;
+IF Man5_PumpDisp THEN cmdMask2_local.4 := FALSE; END_IF;
+Man6_Heater1         := cmdMask2_local.5;
+IF Man6_Heater1 THEN cmdMask2_local.5 := FALSE; END_IF;
+Man7_Heater2         := cmdMask2_local.6;
+IF Man7_Heater2 THEN cmdMask2_local.6 := FALSE; END_IF;
+Man8_Heater3         := cmdMask2_local.7;
+IF Man8_Heater3 THEN cmdMask2_local.7 := FALSE; END_IF;
+Man9_ValveCIP_Cold   := cmdMask2_local.8;
+IF Man9_ValveCIP_Cold THEN cmdMask2_local.8 := FALSE; END_IF;
+Man10_ValveCIP_Hot   := cmdMask2_local.9;
+IF Man10_ValveCIP_Hot THEN cmdMask2_local.9 := FALSE; END_IF;
+Man11_ValveAlk       := cmdMask2_local.10;
+IF Man11_ValveAlk THEN cmdMask2_local.10 := FALSE; END_IF;
+Man12_ValveAcid      := cmdMask2_local.11;
+IF Man12_ValveAcid THEN cmdMask2_local.11 := FALSE; END_IF;
+Man13_PumpCIP        := cmdMask2_local.12;
+IF Man13_PumpCIP THEN cmdMask2_local.12 := FALSE; END_IF;
+Man14_ValveDrain     := cmdMask2_local.13;
+IF Man14_ValveDrain THEN cmdMask2_local.13 := FALSE; END_IF;
+
+// Отквитированные значения возвращаем в Modbus
+MB_CmdMask1_Ack := cmdMask1_local;
+MB_CmdMask2_Ack := cmdMask2_local;
 
 // ===== ПЧ: ограничение задания и мониторы =====
 IF MB_SetMixerFreq_0_1pct50 > PAR_MaxMixerSpeed_0_1pct50 THEN

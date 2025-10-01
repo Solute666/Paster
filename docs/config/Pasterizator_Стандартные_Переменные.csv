@@ -184,7 +184,7 @@ CIP_CMD_Mixer_ON;Boolean;No;0;Связь: FB_CIPManager_v2.CIP_Mixer_ON → FB_A
 PAST_CircPump_ON;Boolean;No;0;Команда на циркуляционный насос ПАСТЕРИЗАТОРА.;Ram;PastOut
 PAST_Mixer_ON;Boolean;No;0;Команда на мешалку (прямой ход) от пастеризатора.;Ram;PastOut
 PAST_CoolingValve_ON;Boolean;No;0;Команда на клапан охлаждения рубашки (холодная вода).;Ram;PastOut
-PAST_HeatPowerReq;Boolean;No;0;Разрешение нагрева для блока управления температурой;Ram;PastOut
+PAST_HeatEnable;Boolean;No;0;Разрешение нагрева для блока управления температурой;Ram;PastOut
 PAST_StageMask;Boolean;No;0;Битовая маска этапов пастеризации (для HMI/диагностики), из FB_PasteurManager.StageMask_Pasteur.;Ram;PastOut
 TEMP_DO_Heater1_Cmd;Boolean;No;0;Команда нагрев 1 от TempMgr;Ram;Temp
 TEMP_DO_Heater2_Cmd;Boolean;No;0;Команда нагрев 2 от TempMgr;Ram;Temp

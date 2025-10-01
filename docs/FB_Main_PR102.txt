@@ -76,8 +76,8 @@ VAR_INPUT
     AI_TempProduct_x10_UD : UDINT;   // продукт, °C×10 (из АЦП/сети)
     AI_TempJacket_x10_UD  : UDINT;   // рубашка, °C×10 (из АЦП/сети)
 
-    // ===== Из PasteurManager: требование мощности нагрева (PID → %-мощность) =====
-    HeatingPowerReq_IN     : REAL;   // −1.0 = выключить нагрев, иначе 0..300 (% каскад по группам)
+    // ===== Из PasteurManager: разрешение нагрева =====
+    Pasteur_HeatEnable_IN  : BOOL;   // TRUE = разрешить нагрев, FALSE = запретить
 END_VAR
 
 VAR_OUTPUT
@@ -145,10 +145,10 @@ VAR_OUTPUT
     Mode_CIP_Rinse_RunReq  : BOOL; // b12
     CMD_ResetSoftFlow      : BOOL; // b15 — сброс софт-расходомера (зеркало)
 
-    // ===== Выходы для TemperatureManager (RAW + задание мощности) =====
+    // ===== Выходы для TemperatureManager (RAW + разрешение нагрева) =====
     PV_TempProduct_Raw     : REAL;   // °C, из ×10 (валидные)
     PV_TempJacket_Raw      : REAL;   // °C, из ×10 (валидные)
-    HeaterPowerPct_toTemp  : REAL;   // −1.0 вне режима пастеризации, иначе passthrough от HeatingPowerReq_IN
+    Pasteur_HeatEnable     : BOOL;   // → FB_TemperatureManager.Pasteur_HeatEnable
 
     // ===== Для PasteurManager =====
     RecipeMode             : BOOL;   // режим «поэтапный» (из ParMask.b7)
@@ -447,11 +447,11 @@ Mode_CIP_Alk_RunReq   := (ActiveMode_UD = 11) AND reqCIP_Alk;
 Mode_CIP_Acid_RunReq  := (ActiveMode_UD = 12) AND reqCIP_Acid;
 Mode_CIP_Rinse_RunReq := (ActiveMode_UD = 13) AND reqCIP_Rinse;
 
-// ===== Подача %-мощности в TemperatureManager (passthrough) =====
+// ===== Разрешение нагрева для TemperatureManager =====
 IF Mode_Pasteur_RunReq THEN
-    HeaterPowerPct_toTemp := HeatingPowerReq_IN;  // passthrough, REAL
+    Pasteur_HeatEnable := Pasteur_HeatEnable_IN;
 ELSE
-    HeaterPowerPct_toTemp := -1.0;                // выключить нагрев вне режима пастеризации
+    Pasteur_HeatEnable := FALSE; // сброс при останове/смене режима
 END_IF;
 
 // ===== MB_CmdMask2 (542) — ручные DO (1:1 с DO) =====
